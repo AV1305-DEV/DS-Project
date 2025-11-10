@@ -64,16 +64,38 @@
       border-bottom: 1px solid var(--border);
     }
     .nav {
-      max-width: 1280px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 16px;
+      max-width: 1280px; margin: 0 auto; padding: 10px 60px 10px 60px; display: flex; align-items: center; gap: 16px; position: relative;
     }
     .brand { font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
     .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
     .brand span { font-size: 16px; }
-    nav.menu { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
-    nav.menu a { padding: 8px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; }
+  /* Force a single horizontal row for nav items; allow horizontal scrolling on small screens */
+  nav.menu { display: flex; flex-wrap: nowrap; gap: 10px; margin-left: auto; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  nav.menu a { padding: 8px 12px; border-radius: 8px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+  nav.menu::-webkit-scrollbar { height: 8px; }
+  nav.menu::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.06); border-radius: 999px; }
     nav.menu a:hover, nav.menu a:focus { color: var(--text); background: var(--border); outline: none; box-shadow: var(--focus); }
-    .theme-toggle { border: 1px solid var(--border); background: var(--bg-elev); color: var(--muted); padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 600; }
-    .theme-toggle:hover { color: var(--text); border-color: var(--muted); }
+    /* Small circular theme toggle placed at top-left of the header */
+    .theme-toggle { 
+      border: 1px solid var(--border); 
+      background: var(--bg-elev); 
+      color: var(--muted); 
+      padding: 8px; 
+      border-radius: 999px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      width: 44px; 
+      height: 44px; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      position: absolute; 
+      left: 12px; 
+      top: 50%; 
+      transform: translateY(-50%);
+      font-size: 20px;
+    }
+    .theme-toggle:hover { color: var(--text); border-color: var(--muted); transform: translateY(-50%) scale(1.05); }
 
     /* Hero */
     .hero { max-width: 1280px; margin: 24px auto; padding: 24px 16px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: center; }
@@ -165,6 +187,7 @@
   <div class="progress" id="scrollProgress" aria-hidden="true"></div>
   <header class="site-header" role="banner" aria-label="Site header">
     <div class="nav">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">🌗</button>
       <div class="brand" aria-label="Brand">
         <span class="dot" aria-hidden="true"></span>
         <span>Circular Linked List - Complete Guide & Visualization</span>
@@ -179,7 +202,6 @@
         <a href="#complexity">Complexity</a>
         <a href="#comparison">Comparison</a>
       </nav>
-      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">🌗 Theme</button>
     </div>
   </header>
 
@@ -249,19 +271,35 @@
         <div class="panel">
           <div class="panel-header"><strong>Circular Singly Linked List</strong></div>
           <div class="panel-body">
-            <p>Each node stores <code>data</code> and a single pointer <code>next</code>. The last node's <code>next</code> points to <code>head</code>.</p>
-            <div id="typesSingly" style="height:220px;">
-              <svg viewBox="0 0 480 220"></svg>
+            <p>Each node stores <code>data</code> and a single pointer <code>next</code>. The last node's <code>next</code> points to <code>head</code>, creating a closed loop. This makes wrap-around traversals natural and efficient for cyclic tasks.</p>
+            <p><strong>Key properties & uses:</strong></p>
+            <ul>
+              <li>O(1) insertion at head or tail when <code>tail</code> is tracked.</li>
+              <li>Traversal must detect when it returns to <code>head</code> to avoid infinite loops.</li>
+              <li>Ideal for round-robin scheduling, circular buffers, and repeating playlists.</li>
+            </ul>
+            <p><strong>Example:</strong> To insert at end, link the new node to <code>head</code> and update <code>tail</code> to the new node so the circle remains intact.</p>
+            <div id="typesSingly" style="height:240px; margin-top:12px;">
+              <svg viewBox="0 0 480 220" style="width:100%; height:100%;"></svg>
             </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:8px; font-style:italic;">Diagram: Nodes laid out in a ring. Arrows point to the next node; the last node points back to the first, completing the circular structure.</p>
           </div>
         </div>
         <div class="panel">
           <div class="panel-header"><strong>Circular Doubly Linked List</strong></div>
           <div class="panel-body">
-            <p>Each node stores <code>data</code>, <code>prev</code>, and <code>next</code>. The last node points forward to <code>head</code> and <code>head.prev</code> points back to the last node.</p>
-            <div id="typesDoubly" style="height:220px;">
-              <svg viewBox="0 0 480 220"></svg>
+            <p>Each node stores <code>data</code>, <code>prev</code>, and <code>next</code>. The last node's <code>next</code> points to <code>head</code> and <code>head.prev</code> points back to the last node, allowing bidirectional traversal.</p>
+            <p><strong>When to use doubly circular lists:</strong></p>
+            <ul>
+              <li>When you need efficient backward traversal or O(1) deletion of the tail node.</li>
+              <li>Useful in undo-redo buffers, music players (previous/next), and deque-like circular structures.</li>
+              <li>Memory overhead is higher due to the extra <code>prev</code> pointer per node.</li>
+            </ul>
+            <p style="margin-bottom:8px;">Visual note: Each arrow in the diagram represents a pointer. Forward and backward links form two concentric directions around the ring.</p>
+            <div id="typesDoubly" style="height:240px; margin-top:12px;">
+              <svg viewBox="0 0 480 220" style="width:100%; height:100%;"></svg>
             </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:8px; font-style:italic;">Diagram: Dual arrows show <code>next</code> and <code>prev</code> links. This enables constant-time removal when the node reference is known.</p>
           </div>
         </div>
       </div>
